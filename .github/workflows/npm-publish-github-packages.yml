@@ -1,6 +1,3 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
-
 name: Node.js Package
 
 on:
@@ -12,29 +9,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # cache             
       - name: Cache
         uses: actions/cache@v4.2.3
         with:
-          # A list of files, directories, and wildcard patterns to cache and restore
           path: ~/.npm
-          # An explicit key for restoring and saving the cache
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}    
-          # An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: Install dependencies     
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-       - run: npm ci
-       - run: npm test
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
       - name: Build and run app
-         env:
-           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-         run: node app.js
-
-
+        env:
+          OPENAI_API_KEY: ${{ secrets.OA }}
+        run: node app.js
 
   publish-gpr:
     needs: build
@@ -51,4 +44,4 @@ jobs:
       - run: npm ci
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
